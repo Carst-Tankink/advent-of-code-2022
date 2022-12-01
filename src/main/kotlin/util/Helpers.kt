@@ -88,6 +88,21 @@ class Helpers {
             }
         }
     }
-
-
 }
+tailrec fun <T> List<T?>.accumulateToGroups(
+    remaining: List<T?> = this,
+    current: List<T> = emptyList(),
+    acc: List<List<T>> = emptyList()
+): List<List<T>> {
+    return if (remaining.isEmpty()) acc + listOf(current) else {
+        val next = remaining.first()
+        val tail = remaining.drop(1)
+        if (next == null) {
+            accumulateToGroups(tail, emptyList(), acc + listOf(current))
+        } else {
+            accumulateToGroups(tail, current + next, acc)
+        }
+    }
+}
+
+
