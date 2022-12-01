@@ -13,7 +13,7 @@ private fun getCurrentDay(override: Int? = null): Int {
 
 private fun getConstructorOfDay(day: Int): Constructor<out Solution<*, *>> {
     val reflections = Reflections("day$day")
-    return reflections.getSubTypesOf(Solution::class.java).first().getConstructor()
+    return reflections.getSubTypesOf(Solution::class.java).first().getConstructor(String::class.java)
 }
 
 private fun <I, S> solveDay(day: Int, constructor: (String) -> Solution<I, S>) {

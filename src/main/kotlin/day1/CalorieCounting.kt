@@ -7,13 +7,16 @@ class CalorieCounting(fileName: String) : Solution<Int, Int>(fileName) {
     override fun parse(line: String): Int? = if (line.isBlank()) null else line.toInt()
 
     override fun List<Int?>.solve1(): Int {
-        val bags: List<List<Int>> = accumulateToGroups()
-        return bags.maxOfOrNull { it.sum() } ?: -1
+        return accumulateToGroups().topN(1)
     }
 
     override fun List<Int?>.solve2(): Int {
-        val bags: List<List<Int>> = accumulateToGroups()
-
-        return bags.map { it.sum() }.sortedDescending().take(3).sum()
+        return accumulateToGroups().topN(3)
     }
+
+    private fun List<List<Int>>.topN(n: Int) =
+        this.map { it.sum() }
+            .sortedDescending()
+            .take(n)
+            .sum()
 }
