@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package util
 
 sealed class Either<L, R>(val left: L?, val right: R?)
@@ -24,15 +26,15 @@ data class Point(val x: Long, val y: Long) {
             Point(-1, -1), Point(1, -1),
             Point(-1, 1), Point(1, 1)
         )
-        return (nonCardinal + listOf(
-            Point(0, -1),
-            Point(1, 0),
-            Point(0, 1),
-            Point(-1, 0)
-        )).map { dir -> this + dir }
+        return (
+            nonCardinal + listOf(
+                Point(0, -1),
+                Point(1, 0),
+                Point(0, 1),
+                Point(-1, 0)
+            )
+            ).map { dir -> this + dir }
     }
-
-
 }
 
 typealias Grid<T> = Map<Point, T>
@@ -50,8 +52,9 @@ class Helpers {
         fun Char.intValue() = this.code - 48
 
         fun <T> transpose(input: List<List<T>>): List<List<T>> {
-            return if (input.any { it.isEmpty() }) emptyList() else
+            return if (input.any { it.isEmpty() }) emptyList() else {
                 listOf(input.map { it[0] }) + transpose(input.map { it.drop(1) })
+            }
         }
 
         fun toDecimal(digits: List<Int>, base: Int): Long {
@@ -104,5 +107,3 @@ tailrec fun <T> List<T?>.accumulateToGroups(
         }
     }
 }
-
-
