@@ -6,12 +6,11 @@ abstract class Solution<Input, SolutionType>(fileName: String) {
 
     val data: List<Input?> = javaClass
         .getResource(fileName)
-        .readText()
-        .lines()
-        .map { parse(it) }
+        ?.readText()
+        ?.lines()
+        ?.map { parse(it) } ?: emptyList()
 
     abstract fun parse(line: String): Input?
     abstract fun List<Input?>.solve1(): SolutionType
     abstract fun List<Input?>.solve2(): SolutionType
-
 }
