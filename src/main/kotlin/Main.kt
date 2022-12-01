@@ -1,23 +1,19 @@
 import org.reflections.Reflections
 import util.Solution
+import java.lang.reflect.Constructor
 import java.time.LocalDateTime
 
 fun main() {
-    val constructor = getClassOfDay(getCurrentDay()).getConstructor(String::class.java)
-    solveDay(getCurrentDay()) { s -> constructor.newInstance(s) }
+    solveDay(getCurrentDay()) { s -> getConstructorOfDay(getCurrentDay()).newInstance(s) }
 }
 
 private fun getCurrentDay(override: Int? = null): Int {
     return override ?: LocalDateTime.now().dayOfMonth
 }
 
-private fun getClassOfDay(day: Int): Class<out Solution<*, *>> {
+private fun getConstructorOfDay(day: Int): Constructor<out Solution<*, *>> {
     val reflections = Reflections("day$day")
-
-    val solutions = reflections.getSubTypesOf(Solution::class.java)
-    println("Possible solutions: $solutions")
-
-    return solutions.first()
+    return reflections.getSubTypesOf(Solution::class.java).first().getConstructor()
 }
 
 private fun <I, S> solveDay(day: Int, constructor: (String) -> Solution<I, S>) {
