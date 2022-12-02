@@ -2,6 +2,8 @@ import org.reflections.Reflections
 import util.Solution
 import java.lang.reflect.Constructor
 import java.time.LocalDateTime
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
 
 fun main() {
     solveDay(getCurrentDay()) { s -> getConstructorOfDay(getCurrentDay()).newInstance(s) }
@@ -28,9 +30,13 @@ private fun <I, S> solveDay(day: Int, constructor: (String) -> Solution<I, S>) {
     runSolution("Input star 2: ") { input.star2() }
 }
 
+@OptIn(ExperimentalTime::class)
 private fun <S> runSolution(message: String, function: () -> S) {
-    val before = System.currentTimeMillis()
-    val solution = function()
-    val after = System.currentTimeMillis()
-    println("$message$solution\nTime: ${after - before}ms")
+    var solution: S
+    val time = measureTime {
+        solution = function()
+    }
+
+    println("$message$solution")
+    println("Time: ${time.inWholeMilliseconds}ms (${time.inWholeMicroseconds}µs)")
 }
