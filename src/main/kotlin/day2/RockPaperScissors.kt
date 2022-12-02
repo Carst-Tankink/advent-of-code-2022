@@ -16,6 +16,14 @@ class RockPaperScissors(fileName: String) : Solution<Pair<RockPaperScissors.Move
         SCISSORS to 3
     )
 
+    private val moveWins: Map<Move, Move> = mapOf(
+        ROCK to SCISSORS,
+        PAPER to ROCK,
+        SCISSORS to PAPER
+    )
+
+    private val moveLoses = moveWins.entries.associateBy({ it.value }) { it.key }
+
     override fun parse(line: String): Pair<Move, String> {
         val parts = line.split(' ')
 
@@ -30,10 +38,8 @@ class RockPaperScissors(fileName: String) : Solution<Pair<RockPaperScissors.Move
 
     private fun scoreMove(elfMove: Move, ourMove: Move): Int {
         val winScore = when {
-            ourMove == elfMove -> 3 // Draw
-            ourMove == ROCK && elfMove == SCISSORS -> 6
-            ourMove == PAPER && elfMove == ROCK -> 6
-            ourMove == SCISSORS && elfMove == PAPER -> 6
+            ourMove == elfMove -> 3
+            moveWins[ourMove] == elfMove -> 6
             else -> 0
         }
         return (moveScores[ourMove] ?: -1) + winScore
@@ -47,17 +53,9 @@ class RockPaperScissors(fileName: String) : Solution<Pair<RockPaperScissors.Move
 
     private fun pickMove(elfMove: Move, strategy: String): Move {
         return when (strategy) {
-            "X" -> when (elfMove) {
-                ROCK -> SCISSORS
-                PAPER -> ROCK
-                SCISSORS -> PAPER
-            }
+            "X" -> moveWins[elfMove]!!
             "Y" -> elfMove
-            "Z" -> when (elfMove) {
-                ROCK -> PAPER
-                PAPER -> SCISSORS
-                SCISSORS -> ROCK
-            }
+            "Z" -> moveLoses[elfMove]!!
             else -> TODO("Unknown strategy")
         }
     }
