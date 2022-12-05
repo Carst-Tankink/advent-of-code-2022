@@ -9,15 +9,14 @@ class RucksackReorganization(fileName: String) : Solution<Pair<List<Char>, List<
         }
     }
 
-    override fun List<Pair<List<Char>, List<Char>>?>.solve1(): Int {
-        return this.filterNotNull()
+    override fun List<Pair<List<Char>, List<Char>>>.solve1(): Int {
+        return this
             .map { (compartment1, compartment2) -> compartment1.intersect(compartment2.toSet()).first() }
             .sumOf { priority(it) }
     }
 
-    override fun List<Pair<List<Char>, List<Char>>?>.solve2(): Int {
+    override fun List<Pair<List<Char>, List<Char>>>.solve2(): Int {
         return this.asSequence()
-            .filterNotNull()
             .map { (it.first + it.second).toSet() }
             .chunked(3)
             .map { it[0].intersect(it[1]).intersect(it[2]).first() }

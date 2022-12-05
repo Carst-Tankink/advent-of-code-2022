@@ -3,15 +3,23 @@ package day1
 import util.Solution
 import util.accumulateToGroups
 
-class CalorieCounting(fileName: String) : Solution<Int, Int>(fileName) {
-    override fun parse(line: String): Int? = if (line.isBlank()) null else line.toInt()
+sealed interface CalorieInput
+object EmptyCalories : CalorieInput
+data class Calories(val value: Int) : CalorieInput
 
-    override fun List<Int?>.solve1(): Int {
-        return accumulateToGroups().topN(1)
+class CalorieCounting(fileName: String) : Solution<CalorieInput, Int>(fileName) {
+    override fun parse(line: String): CalorieInput = if (line.isBlank()) EmptyCalories else Calories(line.toInt())
+
+    override fun List<CalorieInput>.solve1(): Int {
+        return this
+            .map { if (it is Calories) it.value else null }
+            .accumulateToGroups().topN(1)
     }
 
-    override fun List<Int?>.solve2(): Int {
-        return accumulateToGroups().topN(3)
+    override fun List<CalorieInput>.solve2(): Int {
+        return this
+            .map { if (it is Calories) it.value else null }
+            .accumulateToGroups().topN(3)
     }
 
     private fun List<List<Int>>.topN(n: Int) =
