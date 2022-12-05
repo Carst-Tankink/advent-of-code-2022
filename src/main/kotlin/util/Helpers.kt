@@ -27,13 +27,13 @@ data class Point(val x: Long, val y: Long) {
             Point(-1, 1), Point(1, 1)
         )
         return (
-            nonCardinal + listOf(
-                Point(0, -1),
-                Point(1, 0),
-                Point(0, 1),
-                Point(-1, 0)
-            )
-            ).map { dir -> this + dir }
+                nonCardinal + listOf(
+                    Point(0, -1),
+                    Point(1, 0),
+                    Point(0, 1),
+                    Point(-1, 0)
+                )
+                ).map { dir -> this + dir }
     }
 }
 
@@ -51,9 +51,16 @@ class Helpers {
     companion object {
         fun Char.intValue() = this.code - 48
 
-        fun <T> transpose(input: List<List<T>>): List<List<T>> {
-            return if (input.any { it.isEmpty() }) emptyList() else {
-                listOf(input.map { it[0] }) + transpose(input.map { it.drop(1) })
+        fun <E> List<E>.pad(height: Int, e: E? = null): List<E?> {
+            return if (this.size == height) this else {
+                (this + e).pad(height)
+            }
+        }
+
+
+        fun <T> List<List<T>>.transpose(): List<List<T>> {
+            return if (this.any { it.isEmpty() }) emptyList() else {
+                listOf(this.map { it[0] }) + this.map { it.drop(1) }.transpose()
             }
         }
 
@@ -92,6 +99,7 @@ class Helpers {
         }
     }
 }
+
 tailrec fun <T> List<T?>.accumulateToGroups(
     remaining: List<T?> = this,
     current: List<T> = emptyList(),

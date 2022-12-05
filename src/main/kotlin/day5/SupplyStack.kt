@@ -1,5 +1,7 @@
 package day5
 
+import util.Helpers.Companion.pad
+import util.Helpers.Companion.transpose
 import util.Solution
 
 sealed interface StackInput
@@ -43,14 +45,10 @@ class SupplyStack(fileName: String) : Solution<StackInput, String>(fileName) {
     }
 
     private fun List<StackInput>.moveCrates(is9001: Boolean): String {
-        val stackLayers = this.filterIsInstance<StackContainers>()
-        val stacks: List<List<Char>> = (0 until (stackLayers.last().stacks.size)).map { i ->
-            stackLayers
-                .map { it.stacks }
-                .mapNotNull { if (i < it.size) it[i] else null }
-        }
-            .map { it.reversed() }
-            .toList()
+        val stackLayers: List<List<Char?>> = this.filterIsInstance<StackContainers>().map { it.stacks }
+        val stacks = stackLayers
+            .map { it.pad(stackLayers.maxOf { l -> l.size }) }
+            .transpose().map { it.filterNotNull().reversed() }
         val moves = this.filterIsInstance<Move>()
         val finalStacks = moves.fold(stacks) { s, move ->
             val stacksToMove = s[move.from].takeLast(move.amount)
