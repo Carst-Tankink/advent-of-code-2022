@@ -1,16 +1,17 @@
 package util
 
 abstract class Solution<Input, SolutionType>(fileName: String) {
-    fun star1(): SolutionType = data.solve1()
-    fun star2(): SolutionType = data.solve2()
-
     val data: List<Input> = javaClass
         .getResource(fileName)
         ?.readText()
         ?.lines()
         ?.mapNotNull { parse(it) } ?: emptyList()
 
+    fun star1(): SolutionType = solve1(data)
+    fun star2(): SolutionType = solve2(data)
+
+
     abstract fun parse(line: String): Input?
-    abstract fun List<Input>.solve1(): SolutionType
-    abstract fun List<Input>.solve2(): SolutionType
+    abstract fun solve1(data: List<Input>): SolutionType
+    abstract fun solve2(data: List<Input>): SolutionType
 }

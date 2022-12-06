@@ -36,12 +36,12 @@ class SupplyStack(fileName: String) : Solution<StackInput, String>(fileName) {
         }
     }
 
-    override fun List<StackInput>.solve1(): String {
-        return moveCrates(is9001 = false)
+    override fun solve1(data: List<StackInput>): String {
+        return data.moveCrates(is9001 = false)
     }
 
-    override fun List<StackInput>.solve2(): String {
-        return moveCrates(is9001 = true)
+    override fun solve2(data: List<StackInput>): String {
+        return data.moveCrates(is9001 = true)
     }
 
     private fun List<StackInput>.moveCrates(is9001: Boolean): String {

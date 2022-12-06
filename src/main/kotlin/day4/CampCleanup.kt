@@ -21,13 +21,13 @@ class CampCleanup(fileName: String) : Solution<Pair<Range, Range>, Int>(fileName
             }
     }
 
-    override fun List<Pair<Range, Range>>.solve1(): Int {
-        return this
+    override fun solve1(data: List<Pair<Range, Range>>): Int {
+        return data
             .count { (r1, r2) -> r1.isWithin(r2) || r2.isWithin(r1) }
     }
 
-    override fun List<Pair<Range, Range>>.solve2(): Int {
-        return this
+    override fun solve2(data: List<Pair<Range, Range>>): Int {
+        return data
             .count { (r1, r2) -> r1.overlaps(r2) || r2.overlaps(r1) }
     }
 }

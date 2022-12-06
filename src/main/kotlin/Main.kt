@@ -6,7 +6,8 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 
 fun main() {
-    solveDay(getCurrentDay()) { s -> getConstructorOfDay(getCurrentDay()).newInstance(s) }
+    val day = getCurrentDay()
+    solveDay(day) { s -> getConstructorOfDay(day).newInstance(s) }
 }
 
 private fun getCurrentDay(override: Int? = null): Int {

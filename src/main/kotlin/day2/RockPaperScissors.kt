@@ -30,8 +30,8 @@ class RockPaperScissors(fileName: String) : Solution<Pair<RockPaperScissors.Move
         return Pair(elfMove(parts[0]), parts[1])
     }
 
-    override fun List<Pair<Move, String>>.solve1(): Int {
-        return this
+    override fun solve1(data: List<Pair<Move, String>>): Int {
+        return data
             .sumOf { (elf, ours) -> scoreMove(elf, ourMove(ours)) }
     }
 
@@ -44,8 +44,8 @@ class RockPaperScissors(fileName: String) : Solution<Pair<RockPaperScissors.Move
         return (moveScores[ourMove] ?: -1) + winScore
     }
 
-    override fun List<Pair<Move, String>>.solve2(): Int {
-        return this
+    override fun solve2(data: List<Pair<Move, String>>): Int {
+        return data
             .map { (elfMove, strategy) -> Pair(elfMove, pickMove(elfMove, strategy)) }
             .sumOf { (elfMove, ourMove) -> scoreMove(elfMove, ourMove) }
     }
