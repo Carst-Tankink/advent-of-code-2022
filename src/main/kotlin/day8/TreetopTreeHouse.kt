@@ -1,5 +1,6 @@
 package day8
 
+import util.Helpers.Companion.toGrid
 import util.Helpers.Companion.transpose
 import util.Point
 import util.Solution
@@ -20,7 +21,7 @@ class TreetopTreeHouse(fileName: String) : Solution<List<Int>, Int>(fileName) {
 
         val visible = visibleHorizontal.union(visibleVertical)
         println("Visible: $visible")
-        
+
 
         return visible.size
     }
@@ -48,11 +49,54 @@ class TreetopTreeHouse(fileName: String) : Solution<List<Int>, Int>(fileName) {
                 }
             }.visible
         }
-        
+
         return visibleFromLeft.union(visibleFromRight)
     }
 
     override fun solve2(data: List<List<Int>>): Int {
-        TODO("Not yet implemented")
+        val grid = data.toGrid()
+
+        fun getVisibleTrees(trees: List<Map.Entry<Point, Int>>, height: Int): Int {
+            val untilBlocked = trees.takeWhile { it.value < height }.size
+            return if (untilBlocked == trees.size) {
+                // No blocking tree, so no correction needed
+                untilBlocked
+            } else {
+                // Account for blocking tree
+                untilBlocked + 1
+            }
+        }
+
+        fun calculateScenicScore(p: Point): Int {
+            val height = grid[p]!!
+            val leftTrees = grid
+                .filterKeys { it.y == p.y && it.x < p.x }
+                .entries
+                .reversed()
+
+            val rightTrees = grid
+                .filterKeys { it.y == p.y && it.x > p.x }
+                .entries
+                .toList()
+
+            val aboveTrees = grid
+                .filterKeys { it.x == p.x && it.y < p.y }
+                .entries
+                .reversed()
+
+            val belowTrees = grid
+                .filterKeys { it.x == p.x && it.y > p.y }
+                .entries
+                .toList()
+
+            val visibleLeft = getVisibleTrees(leftTrees, height)
+            val visibleRight = getVisibleTrees(rightTrees, height)
+            val visibleAbove = getVisibleTrees(aboveTrees, height)
+            val visibleBelow = getVisibleTrees(belowTrees, height)
+
+            return visibleLeft * visibleRight * visibleAbove * visibleBelow
+        }
+
+        return grid.keys.maxOf { calculateScenicScore(it) }
     }
 }
