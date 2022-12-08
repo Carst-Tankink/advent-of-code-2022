@@ -84,6 +84,20 @@ class Helpers {
                 .toMap()
         }
 
+        fun <T> printGrid(g: Grid<T>): String {
+            val minY = g.minOf { it.key.y }
+            val maxY = g.maxOf { it.key.y }
+
+            val minX = g.minOf { it.key.x }
+            val maxX = g.maxOf { it.key.x }
+
+            return (minY..maxY).joinToString("\n") { y ->
+                (minX..maxX).joinToString("") {x ->
+                    g[Point(x, y)].toString()
+                }
+            }
+        }
+        
         fun printGrid(filledPoints: Set<Point>): String {
             val minY = filledPoints.minOf { it.y }
             val maxY = filledPoints.maxOf { it.y }
