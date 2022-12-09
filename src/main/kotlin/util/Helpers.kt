@@ -10,6 +10,9 @@ data class Point(val x: Long, val y: Long) {
     operator fun plus(other: Point): Point {
         return Point(x + other.x, y + other.y)
     }
+    operator fun minus(other: Point): Point {
+        return Point(x - other.x, y - other.y)
+    }
 
     fun getAllNeighbours(): List<Point> {
         val allPoints = listOf(
