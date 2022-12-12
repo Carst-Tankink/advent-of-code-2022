@@ -2,6 +2,7 @@ package day9
 
 import util.Point
 import util.Solution
+import kotlin.math.sign
 
 enum class Direction {
     LEFT, RIGHT, UP, DOWN
@@ -21,33 +22,43 @@ class RopeBridge(fileName: String) : Solution<RopeMove, Int>(fileName) {
     }
 
     override fun solve1(data: List<RopeMove>): Int {
-        data class FoldState(val head: Point = Point(0, 0), val tailPositions: List<Point> = listOf(Point(0, 0)))
+        val initialRope = List(2) { Point(0, 0) }
+        return pullRope(initialRope, data)
+    }
+
+    private fun pullRope(
+        initialRope: List<Point>,
+        data: List<RopeMove>
+    ): Int {
+        data class FoldState(
+            val rope: List<Point> = initialRope,
+            val tailPositions: Set<Point> = setOf(initialRope.last())
+        )
+
+        fun moveRope(rope: List<Point>, dirVec: Point): List<Point> {
+            val newHead = rope.first() + dirVec
+            return rope.drop(1).fold(listOf(newHead)) { newPositions, knot ->
+                val previousKnot = newPositions.last()
+                val previousKnotNeighbours: List<Point> = previousKnot.let {
+                    listOf(it) + it.getNeighbours(cardinal = false)
+                }
+
+                val newKnot = if (knot in previousKnotNeighbours) knot else {
+                    val (diffX, diffY) = previousKnot - knot
+
+                    Point(knot.x + diffX.sign, knot.y + diffY.sign)
+                }
+
+                newPositions + newKnot
+
+            }
+        }
 
         tailrec fun doMove(state: FoldState, dirVec: Point, steps: Int): FoldState {
             return if (steps == 0) state else {
-                val tail = state.tailPositions.first()
-                val head = state.head + dirVec
-                val newTail = if (tail == head || tail in head.getNeighbours(false)) {
-                    tail
-                } else {
-                    val diff = head - tail
-
-                    val x: Long = when {
-                        diff.x < 0 -> -1
-                        diff.x == 0L -> 0
-                        else -> 1
-                    }
-                    val y: Long = when {
-                        diff.y < 0 -> -1
-                        diff.y == 0L -> 0
-                        else -> 1
-                    }
-                    
-                    Point(tail.x + x, tail.y + y)
-                }
-                doMove(state.copy(head = head, tailPositions = listOf(newTail) + state.tailPositions), dirVec, steps - 1)
+                val newRope = moveRope(state.rope, dirVec)
+                doMove(FoldState(newRope, state.tailPositions + newRope.last()), dirVec, steps - 1)
             }
-
         }
 
         val finalState = data.fold(FoldState()) { state, move ->
@@ -64,6 +75,6 @@ class RopeBridge(fileName: String) : Solution<RopeMove, Int>(fileName) {
     }
 
     override fun solve2(data: List<RopeMove>): Int {
-        TODO("Not yet implemented")
+        return pullRope(List(10) { Point(0, 0) }, data)
     }
 }
