@@ -9,18 +9,25 @@ class HillClimbingAlgorithm(fileName: String) : Solution<List<Char>, Int>(fileNa
     override fun parse(line: String): List<Char> {
         return line.map { it }
     }
-
-
+    
     override fun solve1(data: List<List<Char>>): Int {
         val heightMap = data.toGrid()
         val start = heightMap.entries.first { it.value == 'S' }.key
         return getShortestPathFromStart(heightMap, setOf(start))
     }
 
+    override fun solve2(data: List<List<Char>>): Int {
+        val heightMap = data.toGrid()
+        val starts = heightMap.filterValues { it == 'S' || it == 'a' }.keys
+
+        return getShortestPathFromStart(heightMap, starts)
+    }
+
     private fun getShortestPathFromStart(heightMap: Grid<Char>, starts: Set<Point>): Int {
         val end = heightMap.entries.first { it.value == 'E' }.key
 
-        fun getHeight(v: Point) = if (heightMap[v] == 'S') 'a'.code else if (v == end) 'z'.code else (heightMap[v]?.code ?: 200)
+        fun getHeight(v: Point) =
+            if (heightMap[v] == 'S') 'a'.code else if (v == end) 'z'.code else (heightMap[v]?.code ?: 200)
 
         tailrec fun shortestPath(
             unvisited: Set<Point> = heightMap.keys,
@@ -47,12 +54,5 @@ class HillClimbingAlgorithm(fileName: String) : Solution<List<Char>, Int>(fileNa
         }
 
         return shortestPath()[end] ?: Int.MAX_VALUE
-    }
-
-    override fun solve2(data: List<List<Char>>): Int {
-        val heightMap = data.toGrid()
-        val starts = heightMap.filterValues { it == 'S' || it == 'a' }.keys
-        
-        return getShortestPathFromStart(heightMap, starts)
     }
 }
