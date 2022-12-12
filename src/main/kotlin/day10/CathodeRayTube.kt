@@ -12,35 +12,42 @@ class CathodeRayTube(fileName: String) : Solution<Ins, Int>(fileName) {
         }
     }
 
-    override fun solve1(data: List<Ins>): Int {
-
-        tailrec fun calculate(
-            commands: List<Ins>,
-            x: Int = 1,
-            cycle: Int = 1,
-            signalStrength: Int = 0,
-            inFlight: Int? = null
-        ): Int {
-            return if (commands.isEmpty() || cycle > 220) signalStrength else {
-                val newStrength = signalStrength + (if (cycle % 40 == 20) (cycle * x) else 0)
-
-                if (inFlight == null) {
-                    val head = commands.first()
-                    val tail = commands.drop(1)
-                    val newInflight = if (head is AddX) head.amount else null
-                    calculate(tail, x, cycle + 1, newStrength, newInflight)
-                } else {
-                    val newX = x + inFlight
-                    calculate(commands, newX, cycle + 1, newStrength)
-                }
+    private tailrec fun calculate(
+        commands: List<Ins>,
+        x: Int = 1,
+        cycles: List<Int> = listOf(1),
+        inFlight: Int? = null
+    ): List<Int> {
+        return if (commands.isEmpty()) cycles else {
+            if (inFlight == null) {
+                val head = commands.first()
+                val tail = commands.drop(1)
+                val newInflight = if (head is AddX) head.amount else null
+                calculate(tail, x, cycles + x, newInflight)
+            } else {
+                val newX = x + inFlight
+                calculate(commands, newX, cycles + newX)
             }
         }
+    }
 
-        return calculate(data)
+    override fun solve1(data: List<Ins>): Int {
+        return calculate(data).mapIndexed { index, v -> if ((index + 1) % 40 == 20) v * (index + 1) else 0 }.sum()
     }
 
     override fun solve2(data: List<Ins>): Int {
-        TODO("Not yet implemented")
+        val sprites = calculate(data)
+
+        val points = (0 until 6).joinToString("\n") { y ->
+            (0 until 40).joinToString("") { x ->
+                val position = y * 40 + x
+                val sprite = sprites[position]
+                if (sprite - 1 <= x && x <= sprite + 1) "⬜️" else "◼️"
+            }
+        }
+
+        println(points)
+        return -1
     }
 
 }
