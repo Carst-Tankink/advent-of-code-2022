@@ -10,7 +10,7 @@ data class Dir(val name: String, val contents: List<FileDescriptor>) : FileDescr
 
 val fileRegex = """(\d+) (.*)""".toRegex()
 
-class NoSpaceLeftOnDevice(fileName: String) : Solution<TerminalInteraction, Long>(fileName) {
+class NoSpaceLeftOnDevice(fileName: String) : Solution<TerminalInteraction, Int>(fileName) {
     override fun parse(line: String): TerminalInteraction? {
         val matchResult = fileRegex.matchEntire(line)
         return when {
@@ -22,9 +22,12 @@ class NoSpaceLeftOnDevice(fileName: String) : Solution<TerminalInteraction, Long
         }
     }
 
-    override fun solve1(data: List<TerminalInteraction>): Long {
+    override fun solve1(data: List<TerminalInteraction>): Int {
         assert(data.first() == ChangeDirectoryCommand("/"))
+        return getSizes(data).values.sumOf { if (it <= 100000) it else 0 }
+    }
 
+    private fun getSizes(data: List<TerminalInteraction>): Map<Dir, Int> {
         fun populateDirectory(
             commands: List<TerminalInteraction>,
             name: String,
@@ -47,6 +50,7 @@ class NoSpaceLeftOnDevice(fileName: String) : Solution<TerminalInteraction, Long
             }
         }
 
+
         val (dir, _) = populateDirectory(data.drop(1), "/", emptyList())
 
         fun calculateDirectorySize(dir: Dir): Map<Dir, Int> {
@@ -62,12 +66,17 @@ class NoSpaceLeftOnDevice(fileName: String) : Solution<TerminalInteraction, Long
         }
 
 
-        val sizes = calculateDirectorySize(dir)
-        return sizes.values.sumOf { if (it <= 100000) it.toLong() else 0 }
+        return calculateDirectorySize(dir)
     }
 
-    override fun solve2(data: List<TerminalInteraction>): Long {
-        TODO("Not yet implemented")
+    override fun solve2(data: List<TerminalInteraction>): Int {
+        val sizes = getSizes(data)
+        val rootSize = sizes.entries.find { it.key.name == "/" }!!.value
+
+        val unused = 70_000_000 - rootSize
+        val neededToRemove = 30_000_000 - unused
+
+        return sizes.filterValues { it > neededToRemove }.minOf { it.value }
     }
 
 }
