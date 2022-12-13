@@ -12,7 +12,9 @@ data class Monkey(
     val handled: Int = 0
 )
 
-class MonkeyInTheMiddle(fileName: String) : Solution<String, Int>(fileName) {
+private fun List<Long>.product(): Long = this.fold(1.toLong()) {acc, l -> acc * l}
+
+class MonkeyInTheMiddle(fileName: String) : Solution<String, Long>(fileName) {
     override fun parse(line: String): String? = if (line.isBlank()) null else line.trim()
 
     private fun buildMonkey(description: List<String>): Monkey {
@@ -36,50 +38,57 @@ class MonkeyInTheMiddle(fileName: String) : Solution<String, Int>(fileName) {
         )
     }
 
-    override fun solve1(data: List<String>): Int {
-        val monkeyData = data.chunked(6)
+    private fun playTurn(monkey: Monkey, modulus: Long, isPart2: Boolean = false): Pair<Monkey, Map<Int, List<Long>>> {
+        val worries: Map<Int, List<Long>> = monkey.items
+            .map { monkey.op(it) % modulus }
+            .map { if (isPart2) it else it / 3 }
+            .groupBy { if (it % monkey.divisor == 0.toLong()) monkey.targetTrue else monkey.targetFalse }
+        return Pair(
+            monkey.copy(items = emptyList(), handled = monkey.handled + monkey.items.size),
+            worries
+        )
+    }
 
-        fun playTurn(monkey: Monkey): Pair<Monkey, Map<Int, List<Long>>> {
-            val worries: Map<Int, List<Long>> = monkey.items
-                .map { monkey.op(it) / 3 }
-                .groupBy { if (it % monkey.divisor == 0.toLong()) monkey.targetTrue else monkey.targetFalse }
-            return Pair(
-                monkey.copy(items = emptyList(), handled = monkey.handled + monkey.items.size),
-                worries
+    private tailrec fun playRound(monkeys: List<Monkey>, finishedMonkeys: List<Monkey> = emptyList(), modulus: Long, isPart2: Boolean = false): List<Monkey> {
+        return if (monkeys.isEmpty()) finishedMonkeys else {
+            val firstMonkey = monkeys.first()
+            val (monkey: Monkey, targets: Map<Int, List<Long>>) = playTurn(firstMonkey, modulus, isPart2)
+            assert(monkey.id !in targets)
+
+            playRound(
+                updateMonkeys(monkeys.drop(1), targets),
+                updateMonkeys(finishedMonkeys, targets) + monkey,
+                modulus,
+                isPart2 = isPart2
             )
+
         }
+    }
 
-        fun updateMonkeys(
-            monkeys: List<Monkey>,
-            targets: Map<Int, List<Long>>
-        ) = monkeys.map { m -> m.copy(items = m.items + (targets[m.id] ?: emptyList())) }
-
-        tailrec fun playRound(monkeys: List<Monkey>, finishedMonkeys: List<Monkey> = emptyList()): List<Monkey> {
-            return if (monkeys.isEmpty()) finishedMonkeys else {
-                val firstMonkey = monkeys.first()
-                val (monkey: Monkey, targets: Map<Int, List<Long>>) = playTurn(firstMonkey)
-                assert(monkey.id !in targets)
-
-                playRound(
-                    updateMonkeys(monkeys.drop(1), targets),
-                    updateMonkeys(finishedMonkeys, targets) + monkey
-                )
-
-            }
+    private tailrec fun play(monkeys: List<Monkey>, roundsPlayed: Int = 0, isPart2: Boolean = false): List<Monkey> {
+        val target = if (isPart2) 10000 else 20
+        val modulus = monkeys.map { it.divisor.toLong() }.product()
+        return if (roundsPlayed == target) monkeys else {
+            play(playRound(monkeys, modulus = modulus, isPart2 = true), roundsPlayed + 1, isPart2)
         }
+    }
 
-        tailrec fun play(monkeys: List<Monkey>, roundsPlayed: Int = 0): List<Monkey> {
-            return if (roundsPlayed == 20) monkeys else {
-                play(playRound(monkeys), roundsPlayed + 1)
-            }
-        }
+    private fun updateMonkeys(
+        monkeys: List<Monkey>,
+        targets: Map<Int, List<Long>>
+    ) = monkeys.map { m -> m.copy(items = m.items + (targets[m.id] ?: emptyList())) }
 
+    override fun solve1(data: List<String>): Long {
+        val monkeyData = data.chunked(6)
         val monkeys: List<Monkey> = monkeyData.map { buildMonkey(it) }
         val play = play(monkeys)
         return play.map { it.handled }.sortedDescending().take(2).fold(1) { acc, h -> acc * h }
     }
 
-    override fun solve2(data: List<String>): Int {
-        TODO("Not yet implemented")
+    override fun solve2(data: List<String>): Long {
+        val monkeyData = data.chunked(6)
+        val monkeys: List<Monkey> = monkeyData.map { buildMonkey(it) }
+        val play = play(monkeys, isPart2 = true)
+        return play.map { it.handled }.sortedDescending().take(2).fold(1) { acc, h -> acc * h }
     }
 }
