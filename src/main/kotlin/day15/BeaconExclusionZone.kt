@@ -34,10 +34,9 @@ class BeaconExclusionZone(fileName: String) : Solution<Sensor, Long>(fileName) {
 
     override fun solve2(data: List<Sensor>): Long {
         val outOfBounds = data.flatMap {
-            val center = it.pos
             val maxDistance = it.beaconDistance + 1
             (-maxDistance..maxDistance).map { d ->
-                Point(center.x + d, center.y + (maxDistance - d))
+                it.pos + Point(d, maxDistance - d)
             }.filter { (x, y) ->
                 val maxRange = if (isSample) 20 else 4_000_000
                 x in 0..maxRange && y in 0..maxRange
