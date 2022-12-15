@@ -2,6 +2,8 @@
 
 package util
 
+import kotlin.math.abs
+
 sealed class Either<L, R>(val left: L?, val right: R?)
 class Left<L, R>(value: L) : Either<L, R>(left = value, right = null)
 class Right<L, R>(value: R) : Either<L, R>(left = null, right = value)
@@ -38,6 +40,8 @@ data class Point(val x: Long, val y: Long) {
                 )
                 ).map { dir -> this + dir }
     }
+    
+    fun manhattanDistance(p2: Point): Long = abs(this.x - p2.x) + abs(this.y - p2.y)
 }
 
 typealias Grid<T> = Map<Point, T>
