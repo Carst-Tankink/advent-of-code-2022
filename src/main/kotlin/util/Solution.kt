@@ -6,11 +6,10 @@ abstract class Solution<Input, SolutionType>(fileName: String) {
         ?.readText()
         ?.lines()
         ?.mapNotNull { parse(it) } ?: emptyList()
-    
+
     val isSample = fileName.contains("sample")
     fun star1(): SolutionType = solve1(data)
     fun star2(): SolutionType = solve2(data)
-
 
     abstract fun parse(line: String): Input?
     abstract fun solve1(data: List<Input>): SolutionType

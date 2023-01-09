@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test
 
 class FullOfHotAirTest {
     val hotAir = FullOfHotAir("")
-    val examples = mapOf(
+    val examples: Map<Long, String> = mapOf(
         1 to "1",
         2 to "2",
         3 to "1=",
@@ -21,7 +21,7 @@ class FullOfHotAirTest {
         2022 to "1=11-2",
         12345 to "1-0---0",
         314159265 to "1121-1110-1=0"
-    )
+    ).mapKeys { it.key.toLong() }
 
     @Test
     fun testSnafuToInt() {

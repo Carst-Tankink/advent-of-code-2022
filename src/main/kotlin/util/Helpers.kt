@@ -12,6 +12,7 @@ data class Point(val x: Long, val y: Long) {
     operator fun plus(other: Point): Point {
         return Point(x + other.x, y + other.y)
     }
+
     operator fun minus(other: Point): Point {
         return Point(x - other.x, y - other.y)
     }
@@ -32,16 +33,30 @@ data class Point(val x: Long, val y: Long) {
             Point(-1, 1), Point(1, 1)
         )
         return (
-                nonCardinal + listOf(
-                    Point(0, -1),
-                    Point(1, 0),
-                    Point(0, 1),
-                    Point(-1, 0)
-                )
-                ).map { dir -> this + dir }
+            nonCardinal + listOf(
+                Point(0, -1),
+                Point(1, 0),
+                Point(0, 1),
+                Point(-1, 0)
+            )
+            ).map { dir -> this + dir }
     }
-    
+
     fun manhattanDistance(p2: Point): Long = abs(this.x - p2.x) + abs(this.y - p2.y)
+}
+
+data class Point3D(val x: Long, val y: Long, val z: Long) {
+    operator fun plus(other: Point3D): Point3D = this.copy(x + other.x, y + other.y, z + other.z)
+    fun neighbours(): List<Point3D> {
+        return listOf(
+            Point3D(1, 0, 0),
+            Point3D(-1, 0, 0),
+            Point3D(0, 1, 0),
+            Point3D(0, -1, 0),
+            Point3D(0, 0, 1),
+            Point3D(0, 0, -1)
+        ).map { this + it }
+    }
 }
 
 typealias Grid<T> = Map<Point, T>
@@ -63,7 +78,6 @@ class Helpers {
                 (this + e).pad(height)
             }
         }
-
 
         fun <T> List<List<T>>.transpose(): List<List<T>> {
             return if (this.any { it.isEmpty() }) emptyList() else {
@@ -99,12 +113,12 @@ class Helpers {
             val maxX = g.maxOf { it.key.x }
 
             return (minY..maxY).joinToString("\n") { y ->
-                (minX..maxX).joinToString("") {x ->
+                (minX..maxX).joinToString("") { x ->
                     g[Point(x, y)].toString()
                 }
             }
         }
-        
+
         fun printGrid(filledPoints: Set<Point>): String {
             val minY = filledPoints.minOf { it.y }
             val maxY = filledPoints.maxOf { it.y }
