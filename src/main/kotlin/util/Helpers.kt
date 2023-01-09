@@ -150,3 +150,26 @@ tailrec fun <T> List<T?>.accumulateToGroups(
         }
     }
 }
+
+enum class Facing(val vector: Point) {
+    LEFT(Point(-1, 0)),
+    RIGHT(Point(1, 0)),
+    UP(Point(0, -1)),
+    DOWN(Point(0, 1));
+
+    fun turnLeft(): Facing = when (this) {
+        LEFT -> DOWN
+        RIGHT -> UP
+        UP -> LEFT
+        DOWN -> RIGHT
+    }
+
+    fun turnRight(): Facing = when (this) {
+        LEFT -> UP
+        RIGHT -> DOWN
+        UP -> RIGHT
+        DOWN -> LEFT
+    }
+
+    fun isHorizontal(): Boolean = this == LEFT || this == RIGHT
+}

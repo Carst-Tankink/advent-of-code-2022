@@ -8,30 +8,9 @@ enum class POI {
 }
 
 sealed interface Direction
-enum class Facing(val vector: Point) : Direction {
-    LEFT(Point(-1, 0)),
-    RIGHT(Point(1, 0)),
-    UP(Point(0, -1)),
-    DOWN(Point(0, 1));
-
-    fun turnLeft(): Facing = when (this) {
-        LEFT -> DOWN
-        RIGHT -> UP
-        UP -> LEFT
-        DOWN -> RIGHT
-    }
-
-    fun turnRight(): Facing = when (this) {
-        LEFT -> UP
-        RIGHT -> DOWN
-        UP -> RIGHT
-        DOWN -> LEFT
-    }
-
-    fun isHorizontal(): Boolean = this == LEFT || this == RIGHT
-}
 
 data class Steps(val steps: Int) : Direction
+data class Turn(val facing: Facing) : Direction
 
 class MonkeyMap(fileName: String) : Solution<Either<List<POI>, List<Direction>>, Long>(fileName) {
     override fun parse(line: String): Either<List<POI>, List<Direction>>? {
@@ -46,37 +25,33 @@ class MonkeyMap(fileName: String) : Solution<Either<List<POI>, List<Direction>>,
                             val stepsList =
                                 if (s.numberInProgress == null) emptyList() else listOf(Steps(s.numberInProgress.toInt()))
                             val facing = if (c == 'L') Facing.LEFT else Facing.RIGHT
-                            s.copy(acc = s.acc + stepsList + facing, numberInProgress = null)
+                            s.copy(acc = s.acc + stepsList + Turn(facing), numberInProgress = null)
                         }
                     }
                 }
 
-
                 Right(folded.acc + Steps(folded.numberInProgress!!.toInt()))
-
             }
 
             line.isEmpty() -> null
-            else -> Left(line.map {
-                when (it) {
-                    ' ' -> POI.EMPTY
-                    '.' -> POI.OPEN
-                    '#' -> POI.WALL
-                    else -> TODO("Unknown character in map: $it")
+            else -> Left(
+                line.map {
+                    when (it) {
+                        ' ' -> POI.EMPTY
+                        '.' -> POI.OPEN
+                        '#' -> POI.WALL
+                        else -> TODO("Unknown character in map: $it")
+                    }
                 }
-            })
+            )
         }
-
     }
 
     override fun solve1(data: List<Either<List<POI>, List<Direction>>>): Long {
-        val map = data.mapNotNull { it.left }
-            .toGrid()
-            .mapKeys { Point(it.key.x + 1, it.key.y + 1) }
-            .filterValues { it != POI.EMPTY }
+        val (map, steps) = prepareData(data)
 
-        fun wrap(p: Point, isHorizontal: Boolean): Point {
-            return if (isHorizontal) {
+        return walkMap(map, steps) { p, facing ->
+            val point = if (facing.isHorizontal()) {
                 val row = map.keys.filter { it.y == p.y }.map { it.x }
                 val minX = row.min()
                 val maxX = row.max()
@@ -95,24 +70,39 @@ class MonkeyMap(fileName: String) : Solution<Either<List<POI>, List<Direction>>,
                     else -> p
                 }
             }
+
+            Pair(point, facing)
         }
+    }
 
+    private fun prepareData(data: List<Either<List<POI>, List<Direction>>>): Pair<Map<Point, POI>, List<Direction>> {
+        return Pair(
+            data.mapNotNull { it.left }
+                .toGrid()
+                .mapKeys { Point(it.key.x + 1, it.key.y + 1) }
+                .filterValues { it != POI.EMPTY },
+            data.firstNotNullOf { it.right }
+        )
+    }
+
+    private fun walkMap(
+        map: Map<Point, POI>,
+        steps: List<Direction>,
+        wrap: (Point, Facing) -> Pair<Point, Facing>
+    ): Long {
         tailrec fun doSteps(position: Point, facing: Facing, steps: Int): Point {
-
             return if (steps == 0) position else {
-                val nextPos = wrap(position + facing.vector, facing.isHorizontal())
-                val next = when (map[nextPos]) {
+                val (nP, nF) = wrap(position + facing.vector, facing)
+                val (nextPosition, nextFacing) = when (map[nP]) {
                     null -> TODO("Wrap around $position, facing: $facing")
-                    POI.WALL -> position
-                    POI.OPEN -> nextPos
-                    else -> TODO()
+                    POI.WALL -> Pair(position, facing)
+                    POI.OPEN -> Pair(nP, nF)
+                    else -> TODO("Empty is not part of map")
                 }
 
-                doSteps(next, facing, steps - 1)
+                doSteps(nextPosition, nextFacing, steps - 1)
             }
         }
-
-        val steps = data.firstNotNullOf { it.right }
 
         val start = map.entries.first { it.value == POI.OPEN }.key
 
@@ -125,8 +115,8 @@ class MonkeyMap(fileName: String) : Solution<Either<List<POI>, List<Direction>>,
                     traveller.copy(position = newPosition)
                 }
 
-                Facing.LEFT -> traveller.copy(facing = traveller.facing.turnLeft())
-                Facing.RIGHT -> traveller.copy(facing = traveller.facing.turnRight())
+                Turn(Facing.LEFT) -> traveller.copy(facing = traveller.facing.turnLeft())
+                Turn(Facing.RIGHT) -> traveller.copy(facing = traveller.facing.turnRight())
                 else -> TODO("Not an instruction, ")
             }
         }
@@ -139,6 +129,35 @@ class MonkeyMap(fileName: String) : Solution<Either<List<POI>, List<Direction>>,
     }
 
     override fun solve2(data: List<Either<List<POI>, List<Direction>>>): Long {
-        TODO("Not yet implemented")
+        val (map, steps) = prepareData(data)
+
+        // Offsets of each face in the map. Offset is the top-left coordinate of each face
+        val faces: Map<String, Point> = if (isSample) mapOf(
+            "TOP" to Point(8, 0),
+            "BACK" to Point(0, 4),
+            "LEFT" to Point(4, 4),
+            "FRONT" to Point(8, 4),
+            "BOTTOM" to Point(8, 8),
+            "RIGHT" to Point(12, 8)
+        ) else mapOf(
+            "TOP" to Point(50, 0),
+            "BACK" to Point(0, 150),
+            "LEFT" to Point(0, 100),
+            "FRONT" to Point(50, 50),
+            "BOTTOM" to Point(50, 100),
+            "RIGHT" to Point(100, 0)
+        )
+
+        fun translateFacings(p: Point, f: Facing): Facing {
+            TODO()
+        }
+
+        fun translatePoint(p: Point): Point {
+            TODO()
+        }
+
+        return walkMap(map, steps) { p, f ->
+            TODO("Not yet implemented")
+        }
     }
 }
